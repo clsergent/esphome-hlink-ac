@@ -469,7 +469,7 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
       if (response_buf[i] == ' ' || response_buf[i] == '\r') {
         uint8_t pos_shift = last_space_i > 0 ? 2 : 0;  // Shift ahead to remove 'X=' from the tokens after initial OK/NG
         ESP_LOGD(TAG, "TOKEN: %c", (char)response_buf[last_space_i + pos_shift]);
-        if (isalpha(response_buf[last_space_i + pos_shift])) { // add token only if valid
+        if (isalpha(response_buf[last_space_i])) { // add token only if valid
           response_tokens.push_back(response_buf.substr(last_space_i + pos_shift, i - last_space_i - pos_shift));
         }
         last_space_i = i + 1;
