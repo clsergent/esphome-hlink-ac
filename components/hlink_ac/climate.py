@@ -73,6 +73,7 @@ SUPPORTED_CLIMATE_PRESETS_OPTIONS = {
 }
 
 HlinkAcSendHlinkCmd = hlink_ac_ns.class_("HlinkAcSendHlinkCmd", automation.Action)
+HlinkAcSendHlinkRequest = hlink_ac_ns.class_("HlinkAcSendHlinkRequest", automation.Action)
 
 
 @automation.register_action(
@@ -87,6 +88,29 @@ HlinkAcSendHlinkCmd = hlink_ac_ns.class_("HlinkAcSendHlinkCmd", automation.Actio
     ),
 )
 async def send_hlink_cmd_to_code(config, action_id, template_arg, args):
+    var = cg.new_Pvariable(action_id, template_arg)
+    await cg.register_parented(var, config[CONF_ID])
+
+    address_template = await cg.templatable(config[CONF_ADDRESS], args, cg.std_string)
+    data_template = await cg.templatable(config[CONF_DATA], args, cg.std_string)
+
+    cg.add(var.set_address(address_template))
+    cg.add(var.set_data(data_template))
+
+    return var
+
+@automation.register_action(
+    "hlink_ac.send_hlink_request",
+    HlinkAcSendHlinkRequest,
+    cv.Schema(
+        {
+            cv.GenerateID(): cv.use_id(HlinkAc),
+            cv.Required(CONF_ADDRESS): cv.templatable(cv.string),
+            cv.Required(CONF_DATA): cv.templatable(cv.string),
+        }
+    ),
+)
+async def send_hlink_request_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg)
     await cg.register_parented(var, config[CONF_ID])
 
