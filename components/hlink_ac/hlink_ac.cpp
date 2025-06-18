@@ -454,7 +454,7 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     // Read response unless carriage return symbol, timeout or reasonable buffer size
     while (millis() - started_millis < timeout_ms || read_index < HLINK_MSG_READ_BUFFER_SIZE) {
       this->read_byte((uint8_t *) &response_buf[read_index]);
-      if (response_buf[read_index] == HLINK_MSG_TERMINATION_SYMBOL) {
+      if (response_buf[read_index] == HLINK_MSG_TERMINATION_SYMBOL && read_index > 0) {
         break;
       }
       read_index++;
