@@ -304,7 +304,7 @@ class HlinkAc : public Component, public uart::UARTDevice, public climate::Clima
   void set_support_hvac_actions(bool support_hvac_actions);
   // ----- END CLIMATE -----
   void send_hlink_cmd(std::string address, std::string data);
-  void end_hlink_request(std::string address, std::string data);
+  void send_hlink_request(std::string address, std::string data);
 
  protected:
   ComponentStatus status_ = ComponentStatus();
