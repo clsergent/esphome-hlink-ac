@@ -523,20 +523,16 @@ void HlinkAc::send_hlink_cmd(std::string address, std::string data) {
       }));
 }
 
-void HlinkAc::send_hlink_request(std::string address, std::string data) {
+void HlinkAc::send_hlink_request(std::string address) {
   if (address.size() != 4) {
     ESP_LOGW(TAG, "Invalid address length: %s", address.c_str());
     return;
   }
-  if (data.size() % 2 != 0) {
-    ESP_LOGW(TAG, "Invalid data length: %s", data.c_str());
-    return;
-  }
+    
   this->pending_action_requests.enqueue(this->create_request_(
-      HlinkRequestFrame::with_string(HlinkRequestFrame::Type::MT,
-                                     static_cast<uint16_t>(std::stoi(address, nullptr, 16)), data),
-      [address, data](const HlinkResponseFrame &response) {
-        ESP_LOGD(TAG, "Successfully applied custom MT request [%s:%s]", address.c_str(), data.c_str());
+      {HlinkRequestFrame::Type::MT, {static_cast<uint16_t>(std::stoi(address, nullptr, 16))}},
+      [address](const HlinkResponseFrame &response) {
+        ESP_LOGD(TAG, "Successfully applied custom MT request [%s]", address.c_str());
       }));
 }
 
