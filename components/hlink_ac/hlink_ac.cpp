@@ -460,6 +460,7 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
       read_index++;
     }
     ESP_LOGD(TAG, "RECEIVED: L=%d, S=%.*s", read_index, read_index, response_buf.c_str());
+
     // Update the timestamp of the last frame received
     this->status_.last_frame_received_at_ms = millis();
     std::vector<std::string> response_tokens;
@@ -519,6 +520,23 @@ void HlinkAc::send_hlink_cmd(std::string address, std::string data) {
                                      static_cast<uint16_t>(std::stoi(address, nullptr, 16)), data),
       [address, data](const HlinkResponseFrame &response) {
         ESP_LOGD(TAG, "Successfully applied custom ST request [%s:%s]", address.c_str(), data.c_str());
+      }));
+}
+
+void HlinkAc::send_hlink_request(std::string address, std::string data) {
+  if (address.size() != 4) {
+    ESP_LOGW(TAG, "Invalid address length: %s", address.c_str());
+    return;
+  }
+  if (data.size() % 2 != 0) {
+    ESP_LOGW(TAG, "Invalid data length: %s", data.c_str());
+    return;
+  }
+  this->pending_action_requests.enqueue(this->create_request_(
+      HlinkRequestFrame::with_string(HlinkRequestFrame::Type::MT,
+                                     static_cast<uint16_t>(std::stoi(address, nullptr, 16)), data),
+      [address, data](const HlinkResponseFrame &response) {
+        ESP_LOGD(TAG, "Successfully applied custom MT request [%s:%s]", address.c_str(), data.c_str());
       }));
 }
 
