@@ -460,7 +460,7 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
       }
       read_index++;
     }
-    ESP_LOGD(TAG, "RECEIVED: L=%d, S=%.*s", read_index, read_index, response_buf.c_str());
+    //ESP_LOGD(TAG, "RECEIVED: L=%d, S=%.*s", read_index, read_index, response_buf.c_str());
 
     // Update the timestamp of the last frame received
     this->status_.last_frame_received_at_ms = millis();
@@ -468,7 +468,7 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     for (int i = 0, last_space_i = 0; i <= read_index; i++) {
       if (response_buf[i] == ' ' || response_buf[i] == '\r') {
         uint8_t pos_shift = last_space_i > 0 ? 2 : 0;  // Shift ahead to remove 'X=' from the tokens after initial OK/NG
-        ESP_LOGD(TAG, "TOKEN: %c", (char)response_buf[last_space_i]);
+        //ESP_LOGD(TAG, "TOKEN: %c", (char)response_buf[last_space_i]);
         if (isalpha(response_buf[last_space_i])) { // add token only if valid
           response_tokens.push_back(response_buf.substr(last_space_i + pos_shift, i - last_space_i - pos_shift));
         }
