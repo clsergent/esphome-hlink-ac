@@ -468,8 +468,18 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     for (int i = 0, first = 0; i <= read_index + 1; i++) {
       if (i == read_index + 1 || response_buf[i] == ' ' || response_buf[i] == '\r') {
         uint8_t pos_shift = first > 0 ? 2 : 0;  // Shift ahead to remove 'X=' from the tokens after initial OK/NG
-        response_tokens.push_back(response_buf.substr(first + pos_shift, i - first - pos_shift));
+        if (i - first - pos_shift >= 2) {
+          response_tokens.push_back(response_buf.substr(first + pos_shift, i - first - pos_shift));
+        }
         first = i + 1;
+      }
+    }
+
+    for (int i = 0, last_space_i = 0; i <= read_index; i++) {
+      if (response_buf[i] == ' ' || response_buf[i] == '\r') {
+        uint8_t pos_shift = last_space_i > 0 ? 2 : 0;  // Shift ahead to remove 'X=' from the tokens after initial OK/NG
+        response_tokens.push_back(response_buf.substr(last_space_i + pos_shift, i - last_space_i - pos_shift));
+        last_space_i = i + 1;
       }
     }
 
