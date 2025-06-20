@@ -455,7 +455,7 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     // Read response unless carriage return symbol, timeout or reasonable buffer size
     while (millis() - started_millis < timeout_ms || read_index < HLINK_MSG_READ_BUFFER_SIZE) {
       this->read_byte((uint8_t *) &response_buf[read_index]);
-      if (response_buf[read_index] == HLINK_MSG_TERMINATION_SYMBOL && read_index > 0) {
+      if (response_buf[read_index] == HLINK_MSG_TERMINATION_SYMBOL) {
         break;
       }
       read_index++;
@@ -467,9 +467,7 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     std::vector<std::string> response_tokens;
     for (int i = 0, first_byte = 0, pos_shift=0; i <= read_index + 1; i++) {
       if (i == read_index + 1 || response_buf[i] == ' ' || response_buf[i] == '\r') {
-        if (i - first_byte >= 2) {
-          response_tokens.push_back(response_buf.substr(first_byte + pos_shift, i - (first_byte + pos_shift)));
-        }
+        response_tokens.push_back(response_buf.substr(first_byte + pos_shift, i - (first_byte + pos_shift)));
         first_byte = i + 1;
         pos_shift = 2;
       }
