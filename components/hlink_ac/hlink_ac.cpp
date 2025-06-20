@@ -460,21 +460,28 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
       }
       read_index++;
     }
-    //ESP_LOGD(TAG, "RECEIVED: L=%d, S=%.*s", read_index, read_index, response_buf.c_str());
+    ESP_LOGW(TAG, "RECEIVED: L=%d, S=%.*s", read_index, read_index, response_buf.c_str());
 
     // Update the timestamp of the last frame received
     this->status_.last_frame_received_at_ms = millis();
     std::vector<std::string> response_tokens;
-    for (int i = 0, last_space_i = 0; i <= read_index; i++) {
-      if (response_buf[i] == ' ' || response_buf[i] == '\r') {
-        uint8_t pos_shift = last_space_i > 0 ? 2 : 0;  // Shift ahead to remove 'X=' from the tokens after initial OK/NG
-        //ESP_LOGD(TAG, "TOKEN: %c", (char)response_buf[last_space_i]);
-        if (isalpha(response_buf[last_space_i])) { // add token only if valid
-          response_tokens.push_back(response_buf.substr(last_space_i + pos_shift, i - last_space_i - pos_shift));
+
+    for (int i = 0, first = 0, length = 0; i <= read_index + 1; i++) {
+      if (i == read_index + 1 || response_buf[i] == ' ' || response_buf[i] == '\r') {
+        if (length == 2) {
+          response_tokens.push_back(response_buf.substr(first, length));
+        } else if (length > 2 && response_buf[first + 1] == '='){
+          response_tokens.push_back(response_buf.substr(first, first + length));
+        } else {
+          ESP_LOGW(TAG, "Skipped invalid data from string %.*s", read_index, response_buf.c_str())
         }
-        last_space_i = i + 1;
+        first = i + 1;
+        length = 0;
+      } else {
+        length++;
       }
     }
+
     if (response_tokens.size() == 1 && response_tokens[0] == HLINK_MSG_OK_TOKEN) {
       // Ack frame
       return HLINK_RESPONSE_ACK_OK;
