@@ -455,7 +455,7 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     // Read response unless carriage return symbol, timeout or reasonable buffer size
     while (millis() - started_millis < timeout_ms || read_index < HLINK_MSG_READ_BUFFER_SIZE) {
       this->read_byte((uint8_t *) &response_buf[read_index]);
-      if (response_buf[read_index] == HLINK_MSG_TERMINATION_SYMBOL) {
+      if (response_buf[read_index] == HLINK_MSG_TERMINATION_SYMBOL && read_index > 2) {
         break;
       }
       read_index++;
@@ -465,11 +465,13 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     // Update the timestamp of the last frame received
     this->status_.last_frame_received_at_ms = millis();
     std::vector<std::string> response_tokens;
-    for (int i = 0, last_space_i = 0; i <= read_index; i++) {
-      if (response_buf[i] == ' ' || response_buf[i] == '\r') {
-        uint8_t pos_shift = last_space_i > 0 ? 2 : 0;  // Shift ahead to remove 'X=' from the tokens after initial OK/NG
-        response_tokens.push_back(response_buf.substr(last_space_i + pos_shift, i - last_space_i - pos_shift));
-        last_space_i = i + 1;
+    for (int i = 0, first_byte = 0, pos_shift=0; i <= read_index + 1; i++) {
+      if (i == read_index + 1 || response_buf[i] == ' ' || response_buf[i] == '\r') {
+        if (i - (first_byte + pos_shift) >= 2) {
+          response_tokens.push_back(response_buf.substr(first_byte + pos_shift, i - (first_byte + pos_shift)));
+        }
+        first_byte = i + 1;
+        pos_shift = 2;
       }
     }
     if (response_tokens.size() == 1 && response_tokens[0] == HLINK_MSG_OK_TOKEN) {
