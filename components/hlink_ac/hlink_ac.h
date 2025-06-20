@@ -20,7 +20,7 @@
 namespace esphome {
 namespace hlink_ac {
 
-constexpr uint32_t STATUS_UPDATE_INTERVAL = 15000;
+constexpr uint32_t STATUS_UPDATE_INTERVAL = 5000;
 constexpr uint32_t STATUS_UPDATE_TIMEOUT = 2500;
 constexpr uint32_t MIN_INTERVAL_BETWEEN_REQUESTS = 60;
 
