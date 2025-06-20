@@ -465,7 +465,7 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     // Update the timestamp of the last frame received
     this->status_.last_frame_received_at_ms = millis();
     std::vector<std::string> response_tokens;
-    for (int i = 0, first = 0, i <= read_index + 1; i++) {
+    for (int i = 0, first = 0; i <= read_index + 1; i++) {
       if (i == read_index + 1 || response_buf[i] == ' ' || response_buf[i] == '\r') {
         uint8_t pos_shift = first > 0 ? 2 : 0;  // Shift ahead to remove 'X=' from the tokens after initial OK/NG
         response_tokens.push_back(response_buf.substr(first + pos_shift, i - first - pos_shift));
