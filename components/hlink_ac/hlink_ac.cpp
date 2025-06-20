@@ -460,7 +460,7 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
       }
       read_index++;
     }
-    ESP_LOGW(TAG, "RECEIVED: L=%d, S=%s", read_index, response_buf));
+    ESP_LOGW(TAG, "RECEIVED: L=%d, S=%s", read_index, response_buf);
 
     // Update the timestamp of the last frame received
     this->status_.last_frame_received_at_ms = millis();
