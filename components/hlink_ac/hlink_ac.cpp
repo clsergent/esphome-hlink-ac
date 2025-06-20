@@ -465,20 +465,11 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     // Update the timestamp of the last frame received
     this->status_.last_frame_received_at_ms = millis();
     std::vector<std::string> response_tokens;
-
-    for (int i = 0, first = 0, length = 0; i <= read_index + 1; i++) {
+    for (int i = 0, first = 0, pos_shift=0; i <= read_index + 1; i++) {
       if (i == read_index + 1 || response_buf[i] == ' ' || response_buf[i] == '\r') {
-        if (length == 2) {
-          response_tokens.push_back(response_buf.substr(first, length));
-        } else if (length > 2 && response_buf[first + 1] == '='){
-          response_tokens.push_back(response_buf.substr(first, first + length));
-        } else {
-          ESP_LOGW(TAG, "Skipped invalid data from string %.*s", read_index, response_buf.c_str())
-        }
+        response_tokens.push_back(response_buf.substr(first + pos_shift, i - first - pos_shift));
+        pos_shift = 2;
         first = i + 1;
-        length = 0;
-      } else {
-        length++;
       }
     }
 
