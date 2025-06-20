@@ -460,18 +460,18 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
       }
       read_index++;
     }
-    ESP_LOGW(TAG, "RECEIVED: L=%d, S=%.*s", read_index, read_index, response_buf.c_str());
+    ESP_LOGW(TAG, "RECEIVED: L=%d, S=%s", read_index, response_buf));
 
     // Update the timestamp of the last frame received
     this->status_.last_frame_received_at_ms = millis();
     std::vector<std::string> response_tokens;
-    for (int i = 0, first = 0; i <= read_index + 1; i++) {
+    for (int i = 0, first = 0, pos_shift=0; i <= read_index + 1; i++) {
       if (i == read_index + 1 || response_buf[i] == ' ' || response_buf[i] == '\r') {
-        uint8_t pos_shift = first > 0 ? 2 : 0;  // Shift ahead to remove 'X=' from the tokens after initial OK/NG
-        if (i - first - pos_shift >= 2) {
-          response_tokens.push_back(response_buf.substr(first + pos_shift, i - first - pos_shift));
+        if (i - first >= 2) {
+          response_tokens.push_back(response_buf.substr(first + pos_shift, i - (first + pos_shift)));
         }
         first = i + 1;
+        pos_shift = 2;
       }
     }
 
