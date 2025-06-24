@@ -19,6 +19,8 @@ CODEOWNERS = ["@lumixen"]
 SensorTypeEnum = hlink_ac_ns.enum("SensorType", True)
 
 OUTDOOR_TEMPERATURE = "outdoor_temperature"
+INDOOR_TEMPERATURE = "indoor_temperature"
+INDOOR_HUMIDITY = "indoor_humidity"
 
 SENSOR_TYPES = {
     OUTDOOR_TEMPERATURE: sensor.sensor_schema(
