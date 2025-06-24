@@ -417,13 +417,18 @@ void HlinkAc::write_hlink_frame_(HlinkRequestFrame frame) {
   // Reset uart buffer before sending new frame
   uint8_t read_length = 0;
   uint8_t byte;
-  while (this->available()) {
+  /* while (this->available()) {
     if (this->read_byte(&byte)) {
       read_length++;
       if (byte == HLINK_MSG_TERMINATION_SYMBOL) { // restore alignment
         break;
       }
     }
+  } */
+
+  while (this->available()) {
+    this->read();
+    read_length++;
   }
 
   if (read_length > 0) {
