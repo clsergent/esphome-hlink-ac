@@ -473,16 +473,21 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     while (millis() - started_millis < timeout_ms || read_index < HLINK_MSG_READ_BUFFER_SIZE) {
       if (!this->read_byte((uint8_t *) &response_buf[read_index])) {
         ESP_LOGE(TAG, "Timeout: buffer empty at %d", read_index);
-        return HLINK_RESPONSE_INVALID;
+        if (read_index > 0 && read_index < HLINK_MSG_READ_BUFFER_SIZE) {
+          response_buf[read_index] = HLINK_MSG_TERMINATION_SYMBOL;
+          break;
+        }
       }
       if (response_buf[read_index] == HLINK_MSG_TERMINATION_SYMBOL) {
-        if (read_index < 2) {
+        if (read_index == 0) {
           ESP_LOGE(TAG, "Wrong alignment, skipping");
-          return HLINK_RESPONSE_INVALID;
+          
+        } else {
+          break; // waiting for more
         }
-        break;
+      } else {
+        read_index++;
       }
-      read_index++;
     }
 
     // Update the timestamp of the last frame received
