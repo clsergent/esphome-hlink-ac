@@ -420,7 +420,9 @@ void HlinkAc::write_hlink_frame_(HlinkRequestFrame frame) {
     read_length++;
   }
 
-  ESP_LOGD(TAG, "writing skipped %d bytes", read_length);
+  if (read_length > 0) {
+    ESP_LOGE(TAG, "Reset UART: Skipped %d RX bytes", read_length);
+  }
 
   const char *message_type = frame.type == HlinkRequestFrame::Type::MT ? "MT" : "ST";
   uint8_t message_size = 17;  // Default message, e.g. "MT P=1234 C=1234\r"
@@ -460,6 +462,10 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     while (millis() - started_millis < timeout_ms || read_index < HLINK_MSG_READ_BUFFER_SIZE) {
       if (!this->read_byte((uint8_t *) &response_buf[read_index])) {
         ESP_LOGE(TAG, "Timeout occured, skipping");
+        return HLINK_RESPONSE_INVALID;
+      }
+      if (response_buf[read_index] == '\r' && read_index < 17) {
+        ESP_LOGE(TAG, "Wrong alignment, skipping");
         return HLINK_RESPONSE_INVALID;
       }
       if (response_buf[read_index] == HLINK_MSG_TERMINATION_SYMBOL && read_index > 2) {
