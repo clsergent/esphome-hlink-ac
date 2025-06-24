@@ -463,7 +463,7 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     while (millis() - started_millis < timeout_ms || read_index < HLINK_MSG_READ_BUFFER_SIZE) {
       if (!this->read_byte((uint8_t *) &response_buf[read_index])) {
         ESP_LOGE(TAG, "Timeout occured, skipping");
-        return return HLINK_RESPONSE_NOTHING;
+        return HLINK_RESPONSE_NOTHING;
       }
       if (response_buf[read_index] == '\r' && read_index < 2) {
         ESP_LOGE(TAG, "Wrong alignment, skipping");
@@ -474,7 +474,6 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
       }
       read_index++;
     }
-    //ESP_LOGW(TAG, "RECEIVED: L=%d, S=%.*s", read_index, read_index, response_buf.c_str());
 
     // Update the timestamp of the last frame received
     this->status_.last_frame_received_at_ms = millis();
@@ -787,6 +786,28 @@ void HlinkAc::set_sensor(SensorType type, sensor::Sensor *s) {
   switch (type) {
     case SensorType::OUTDOOR_TEMPERATURE:
       this->status_.polling_features.push_back({{HlinkRequestFrame::Type::MT, {FeatureType::CURRENT_OUTDOOR_TEMP}},
+                                                [this, s](const HlinkResponseFrame &response) {
+                                                  optional<int8_t> raw_sensor_value = response.p_value_as_int8();
+                                                  float sensor_value =
+                                                      (raw_sensor_value.has_value() && raw_sensor_value != 0x7E)
+                                                          ? raw_sensor_value.value()
+                                                          : NAN;
+                                                  this->update_sensor_state_(s, sensor_value);
+                                                }});
+      break;
+    case SensorType::INDOOR_TEMPERATURE:
+      this->status_.polling_features.push_back({{HlinkRequestFrame::Type::MT, {FeatureType::CURRENT_INDOOR_TEMP}},
+                                                [this, s](const HlinkResponseFrame &response) {
+                                                  optional<int8_t> raw_sensor_value = response.p_value_as_int8();
+                                                  float sensor_value =
+                                                      (raw_sensor_value.has_value() && raw_sensor_value != 0x7E)
+                                                          ? raw_sensor_value.value()
+                                                          : NAN;
+                                                  this->update_sensor_state_(s, sensor_value);
+                                                }});
+      break;
+    case SensorType::INDOOR_HUMIDITY:
+      this->status_.polling_features.push_back({{HlinkRequestFrame::Type::MT, {FeatureType::CURRENT_INDOOR_HUMIDITY}},
                                                 [this, s](const HlinkResponseFrame &response) {
                                                   optional<int8_t> raw_sensor_value = response.p_value_as_int8();
                                                   float sensor_value =

@@ -72,6 +72,7 @@ enum FeatureType : uint16_t {
   REMOTE_CONTROL_LOCK = 0x0006,
   SWING_MODE = 0x0014,
   CURRENT_INDOOR_TEMP = 0x0100,
+  CURRENT_INDOOR_HUMIDIRY = 0x0101,
   CURRENT_OUTDOOR_TEMP = 0x0102,  // Available only when unit is working, otherwise might return 7E value
   LEAVE_HOME_STATUS_WRITE = 0x0300,
   ACTIVITY_STATUS = 0x0301,       // 0000=Stand-by FFFF=Active
@@ -225,7 +226,9 @@ struct ComponentStatus {
 
 #ifdef USE_SENSOR
 enum class SensorType {
-  OUTDOOR_TEMPERATURE = 0,
+  OUTDOOR_TEMPERATURE,
+  INDOOR_TEMPERATURE,
+  INDOOR_HUMIDITY,
   // Used to count the number of sensors in the enum
   COUNT,
 };
