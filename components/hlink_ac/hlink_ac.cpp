@@ -477,7 +477,7 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
       if (response_buf[read_index] == HLINK_MSG_TERMINATION_SYMBOL) {
         if (read_index < 2) {
           ESP_LOGE(TAG, "Wrong alignment, skipping");
-          return HLINK_RESPONSE_NOTHING;
+          return HLINK_RESPONSE_INVALID;
         }
         break;
       }
