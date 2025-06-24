@@ -216,6 +216,7 @@ void HlinkAc::loop() {
 
   if (this->status_.state == READ_FEATURE_RESPONSE) {
     HlinkResponseFrame response = this->read_hlink_frame_(50);
+    
     if (this->status_.current_request == nullptr) {
       ESP_LOGW(TAG, "Received response for unknown feature");
       this->status_.reset_state();
@@ -462,7 +463,7 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     while (millis() - started_millis < timeout_ms || read_index < HLINK_MSG_READ_BUFFER_SIZE) {
       if (!this->read_byte((uint8_t *) &response_buf[read_index])) {
         ESP_LOGE(TAG, "Timeout occured, skipping");
-        return HLINK_RESPONSE_INVALID;
+        return return HLINK_RESPONSE_NOTHING;
       }
       if (response_buf[read_index] == '\r' && read_index < 2) {
         ESP_LOGE(TAG, "Wrong alignment, skipping");
