@@ -414,9 +414,13 @@ void HlinkAc::publish_updates_if_any_() {
 
 void HlinkAc::write_hlink_frame_(HlinkRequestFrame frame) {
   // Reset uart buffer before sending new frame
+  uint8_t read_length = 0;
   while (this->available()) {
     this->read();
+    read_length++;
   }
+
+  ESP_LOGD(TAG, "writing skipped %d bytes", read_length);
 
   const char *message_type = frame.type == HlinkRequestFrame::Type::MT ? "MT" : "ST";
   uint8_t message_size = 17;  // Default message, e.g. "MT P=1234 C=1234\r"
