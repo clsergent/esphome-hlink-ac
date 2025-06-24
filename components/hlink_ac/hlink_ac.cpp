@@ -472,9 +472,14 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     uint8_t timeout = 0;
     // Read response unless carriage return symbol, timeout or reasonable buffer size
     while (millis() - started_millis < timeout_ms || read_index < HLINK_MSG_READ_BUFFER_SIZE) {
-      if (!this->read_byte((uint8_t *) &response_buf[read_index]) && timeout++ > 0) {
-        ESP_LOGE(TAG, "Timeout occured, skipping");
+      if (!this->read_byte((uint8_t *) &response_buf[read_index])) {
+        if {timeout++ > 2} {
+          ESP_LOGE(TAG, "Timeout occured, skipping");
         return HLINK_RESPONSE_NOTHING;
+        } else {
+          delay(1);
+        }
+        
       }
       if (response_buf[read_index] == '\r' && read_index < 2) {
         ESP_LOGE(TAG, "Wrong alignment, skipping");
