@@ -7,6 +7,7 @@ from esphome.const import (
     ICON_RADIATOR,
     STATE_CLASS_MEASUREMENT,
     UNIT_CELSIUS,
+    UNIT_PERCENT,
 )
 from ..climate import (
     CONF_HLINK_AC_ID,
@@ -22,7 +23,23 @@ OUTDOOR_TEMPERATURE = "outdoor_temperature"
 SENSOR_TYPES = {
     OUTDOOR_TEMPERATURE: sensor.sensor_schema(
         unit_of_measurement=UNIT_CELSIUS,
-        icon=ICON_RADIATOR,
+        icon='mdi:radiator',
+        accuracy_decimals=0,
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
+        entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+    ),
+    INDOOR_TEMPERATURE: sensor.sensor_schema(
+        unit_of_measurement=UNIT_CELSIUS,
+        icon='mdi:thermometer',
+        accuracy_decimals=0,
+        device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
+        entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+    ),
+    INDOOR_HUMIDITY: sensor.sensor_schema(
+        unit_of_measurement=UNIT_PERCENT,
+        icon='mdi:water-percent',
         accuracy_decimals=0,
         device_class=DEVICE_CLASS_TEMPERATURE,
         state_class=STATE_CLASS_MEASUREMENT,
