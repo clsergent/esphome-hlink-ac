@@ -417,20 +417,19 @@ void HlinkAc::write_hlink_frame_(HlinkRequestFrame frame) {
   // Reset uart buffer before sending new frame
   uint8_t read_length = 0;
   uint8_t byte;
-  /* while (this->available()) {
+  while (this->available()) {
     if (this->read_byte(&byte)) {
       read_length++;
       if (byte == HLINK_MSG_TERMINATION_SYMBOL) { // restore alignment
         break;
       }
     }
-  } */
-
-  while (this->available()) {
-    this->read();
-    read_length++;
   }
 
+  /*while (this->available()) {
+    this->read();
+    read_length++;
+  }*/
   if (read_length > 0) {
     ESP_LOGE(TAG, "Reset UART: Skipped %d RX bytes", read_length);
   }
@@ -473,12 +472,7 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     // Read response unless carriage return symbol, timeout or reasonable buffer size
     while (millis() - started_millis < timeout_ms || read_index < HLINK_MSG_READ_BUFFER_SIZE) {
       if (!this->read_byte((uint8_t *) &response_buf[read_index])) {
-        if (timeout++ > 2) {
-          ESP_LOGE(TAG, "Timeout occured, skipping");
-        return HLINK_RESPONSE_NOTHING;
-        } else {
-          delay(1);
-        }
+        return HLINK_RESPONSE_INVALID;
       }
       if (response_buf[read_index] == HLINK_MSG_TERMINATION_SYMBOL) {
         if (read_index < 2) {
