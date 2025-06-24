@@ -416,9 +416,14 @@ void HlinkAc::publish_updates_if_any_() {
 void HlinkAc::write_hlink_frame_(HlinkRequestFrame frame) {
   // Reset uart buffer before sending new frame
   uint8_t read_length = 0;
+  uint8_t byte;
   while (this->available()) {
-    this->read();
-    read_length++;
+    if (this->read_byte(&byte)) {
+      read_length++;
+      if (byte == HLINK_MSG_TERMINATION_SYMBOL) { // restore alignment
+        break;
+      }
+    }
   }
 
   if (read_length > 0) {
@@ -459,9 +464,10 @@ HlinkResponseFrame HlinkAc::read_hlink_frame_(uint32_t timeout_ms) {
     uint32_t started_millis = millis();
     std::string response_buf(HLINK_MSG_READ_BUFFER_SIZE, '\0');
     int read_index = 0;
+    uint8_t timeout = 0;
     // Read response unless carriage return symbol, timeout or reasonable buffer size
     while (millis() - started_millis < timeout_ms || read_index < HLINK_MSG_READ_BUFFER_SIZE) {
-      if (!this->read_byte((uint8_t *) &response_buf[read_index])) {
+      if (!this->read_byte((uint8_t *) &response_buf[read_index]) && timeout++ > 0) {
         ESP_LOGE(TAG, "Timeout occured, skipping");
         return HLINK_RESPONSE_NOTHING;
       }
